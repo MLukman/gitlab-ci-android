@@ -1,25 +1,12 @@
-#
-# GitLab CI: Android v0.2
-#
-# https://hub.docker.com/r/jangrewe/gitlab-ci-android/
-# https://git.faked.org/jan/gitlab-ci-android
-#
-
 FROM ubuntu:16.04
-MAINTAINER Jan Grewe <jan@faked.org>
+MAINTAINER Muhammad Lukman Nasaruddin <anatilmizun@gmail.com>
 
-ENV VERSION_SDK_TOOLS "25.2.3"
-ENV VERSION_BUILD_TOOLS "25.0.2"
-ENV VERSION_TARGET_SDK "25"
-
-ENV SDK_PACKAGES "build-tools-${VERSION_BUILD_TOOLS},android-${VERSION_TARGET_SDK},addon-google_apis-google-${VERSION_TARGET_SDK},platform-tools,extra-android-m2repository,extra-android-support,extra-google-google_play_services,extra-google-m2repository"
-
-ENV ANDROID_HOME "/sdk"
-ENV PATH "$PATH:${ANDROID_HOME}/tools"
 ENV DEBIAN_FRONTEND noninteractive
+ENV ANDROID_HOME "/sdk"
+ENV PATH "$PATH:${ANDROID_HOME}/tools/bin"
 
-RUN apt-get -qq update && \
-    apt-get install -qqy --no-install-recommends \
+RUN apt-get -qq update \
+    && apt-get install -qqy --no-install-recommends \
       curl \
       html2text \
       openjdk-8-jdk \
@@ -29,17 +16,21 @@ RUN apt-get -qq update && \
       lib32ncurses5 \
       lib32z1 \
       unzip \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+      wget \
+      aria2\
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    ; rm -f /etc/ssl/certs/java/cacerts \
+    ; /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-RUN rm -f /etc/ssl/certs/java/cacerts; \
-    /var/lib/dpkg/info/ca-certificates-java.postinst configure
+ENV VERSION_SDK_TOOLS "3859397" # version 26.0.1
 
-RUN curl -s http://dl.google.com/android/repository/tools_r${VERSION_SDK_TOOLS}-linux.zip > /tools.zip && \
-    unzip /tools.zip -d ${ANDROID_HOME} && \
-    rm -v /tools.zip
+RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip -o /tools.zip \
+    && unzip /tools.zip -d ${ANDROID_HOME} \
+    && rm -v /tools.zip \
+    && mkdir -p $ANDROID_HOME/licenses/ \
+    && echo "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > $ANDROID_HOME/licenses/android-sdk-license \
+    && echo "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > $ANDROID_HOME/licenses/android-sdk-preview-license
 
-RUN mkdir -p $ANDROID_HOME/licenses/ \
-  && echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license \
-  && echo "84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_HOME/licenses/android-sdk-preview-license
+ADD install-sdk /usr/bin/
 
-RUN (while [ 1 ]; do sleep 5; echo y; done) | ${ANDROID_HOME}/tools/android update sdk -u -a -s -t ${SDK_PACKAGES}
+RUN chmod +x /usr/bin/install-sdk
