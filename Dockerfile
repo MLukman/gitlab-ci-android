@@ -22,7 +22,8 @@ RUN apt-get -qq update \
     ; rm -f /etc/ssl/certs/java/cacerts \
     ; /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-ENV VERSION_SDK_TOOLS "3859397" # version 26.0.1
+# version 26.0.1
+ENV VERSION_SDK_TOOLS "3859397"
 
 RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip -o /tools.zip \
     && unzip /tools.zip -d ${ANDROID_HOME} \
