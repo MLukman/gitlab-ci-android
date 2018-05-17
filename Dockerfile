@@ -2,8 +2,15 @@ FROM ubuntu:16.04
 MAINTAINER Muhammad Lukman Nasaruddin <anatilmizun@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
+# version 26.0.1
+ENV ANDROID_SDK_TOOLS_VERSION "3859397"
+ENV ANDROID_BUILD_TOOLS_VERSION "27.0.3"
 ENV ANDROID_HOME "/sdk"
-ENV PATH "$PATH:${ANDROID_HOME}/tools/bin"
+ENV GRADLE_VERSION 4.7
+ENV GRADLE_SDK_URL https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip
+ENV GRADLE_HOME ${ANDROID_HOME}/gradle-${GRADLE_VERSION}
+ENV PATH "${GRADLE_HOME}/bin:$PATH:${ANDROID_HOME}/tools/bin"
+
 
 RUN apt-get -qq update \
     && apt-get install -qqy --no-install-recommends \
@@ -22,10 +29,7 @@ RUN apt-get -qq update \
     ; rm -f /etc/ssl/certs/java/cacerts \
     ; /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-# version 26.0.1
-ENV VERSION_SDK_TOOLS "3859397"
-
-RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip -o /tools.zip \
+RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip -o /tools.zip \
     && unzip /tools.zip -d ${ANDROID_HOME} \
     && rm -v /tools.zip \
     && mkdir -p $ANDROID_HOME/licenses/ \
@@ -34,4 +38,8 @@ RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${VE
 
 ADD install-sdk /usr/bin/
 
-RUN chmod +x /usr/bin/install-sdk
+RUN chmod +x /usr/bin/install-sdk && install-sdk "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+
+RUN curl -sSL "${GRADLE_SDK_URL}" -o gradle-${GRADLE_VERSION}-bin.zip  \
+	&& unzip gradle-${GRADLE_VERSION}-bin.zip -d ${GRADLE_HOME}  \
+	&& rm -rf gradle-${GRADLE_VERSION}-bin.zip
