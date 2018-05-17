@@ -11,7 +11,6 @@ ENV GRADLE_SDK_URL https://services.gradle.org/distributions/gradle-${GRADLE_VER
 ENV GRADLE_HOME ${ANDROID_HOME}/gradle-${GRADLE_VERSION}
 ENV PATH "${GRADLE_HOME}/bin:$PATH:${ANDROID_HOME}/tools/bin"
 
-
 RUN apt-get -qq update \
     && apt-get install -qqy --no-install-recommends \
       curl \
@@ -38,7 +37,8 @@ RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${AN
 
 ADD install-sdk /usr/bin/
 
-RUN chmod +x /usr/bin/install-sdk && install-sdk "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+RUN chmod +x /usr/bin/install-sdk \
+	; /usr/bin/install-sdk "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
 
 RUN curl -sSL "${GRADLE_SDK_URL}" -o gradle-${GRADLE_VERSION}-bin.zip  \
 	&& unzip gradle-${GRADLE_VERSION}-bin.zip -d ${GRADLE_HOME}  \
