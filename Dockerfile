@@ -28,17 +28,17 @@ RUN apt-get -qq update \
     ; rm -f /etc/ssl/certs/java/cacerts \
     ; /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
+ADD install-sdk /usr/bin/
+
 RUN aria2c -x5 -k1M http://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip -o /tools.zip \
     && unzip /tools.zip -d ${ANDROID_HOME} \
     && rm -v /tools.zip \
     && mkdir -p $ANDROID_HOME/licenses/ \
     && echo "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > $ANDROID_HOME/licenses/android-sdk-license \
-    && echo "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > $ANDROID_HOME/licenses/android-sdk-preview-license
-
-ADD install-sdk /usr/bin/
-
-RUN chmod +x /usr/bin/install-sdk \
-	; /usr/bin/install-sdk "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+    && echo "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > $ANDROID_HOME/licenses/android-sdk-preview-license \
+    && chmod +x /usr/bin/install-sdk
+    
+RUN /usr/bin/install-sdk "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
 
 RUN curl -sSL "${GRADLE_SDK_URL}" -o gradle-${GRADLE_VERSION}-bin.zip  \
 	&& unzip gradle-${GRADLE_VERSION}-bin.zip -d ${GRADLE_HOME}  \
