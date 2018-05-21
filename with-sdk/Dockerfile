@@ -1,7 +1,8 @@
 FROM mlukman/gitlab-ci-android:latest
 MAINTAINER Muhammad Lukman Nasaruddin <anatilmizun@gmail.com>
 
-ENV ANDROID_PLATFORM "android-22"
+ENV ANDROID_PLATFORM_VERSION "22"
+ENV ANDROID_PLATFORM "android-${ANDROID_PLATFORM_VERSION}"
 ENV ANDROID_BUILD_TOOLS "27.0.3"
 
 RUN install-sdk \
