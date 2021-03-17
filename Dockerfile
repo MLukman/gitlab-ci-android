@@ -18,25 +18,23 @@ RUN apt-get -qq update \
       libc6-i386 \
       lib32stdc++6 \
       lib32gcc1 \
-      lib32ncurses5 \
+      lib32ncurses5-dev \
       lib32z1 \
       unzip \
       wget \
       aria2\
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    ; rm -f /etc/ssl/certs/java/cacerts \
-    ; /var/lib/dpkg/info/ca-certificates-java.postinst configure
-
-ADD install-sdk /usr/bin/
+    && rm -f /etc/ssl/certs/java/cacerts \
+    && /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
 RUN aria2c -x5 -k1M https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_VERSION}_latest.zip -o /tools.zip \
     && unzip /tools.zip -d ${ANDROID_HOME} \
-    && rm -v /tools.zip \
-    && mkdir -p $ANDROID_HOME/licenses/ \
-    && echo "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license \
-    && chmod +x /usr/bin/install-sdk
-    
-RUN /usr/bin/install-sdk "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+    && rm -v /tools.zip
+
+ADD install-sdk /usr/bin/
+             
+RUN chmod +x /usr/bin/install-sdk \
+    && /usr/bin/install-sdk "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
 
 RUN curl -sSL "${GRADLE_SDK_URL}" -o gradle-${GRADLE_VERSION}-bin.zip  \
 	&& unzip gradle-${GRADLE_VERSION}-bin.zip -d ${ANDROID_HOME}  \
